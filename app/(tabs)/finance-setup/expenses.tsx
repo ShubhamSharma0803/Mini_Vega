@@ -10,15 +10,13 @@ import {
   Platform,
 } from 'react-native'
 import { router } from 'expo-router'
-
-type RecurringExpense = {
-  name: string
-  amount: string
-  date: string
-  category: string
-}
+import { useFinanceStore } from '../../../store/finance-store'
+import type { RecurringExpense } from '../../../store/finance-store'
 
 export default function ExpensesSetupScreen() {
+
+  const { setRecurringExpenses } = useFinanceStore()
+  // access the action from the global store
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>([
     { name: '', amount: '', date: '', category: '' }
@@ -37,6 +35,8 @@ export default function ExpensesSetupScreen() {
   }
 
   const handleNext = () => {
+    setRecurringExpenses(expenses)
+    // save to Zustand store before leaving this screen
     router.push('/(tabs)/finance-setup/confirmation')
   }
 
@@ -77,10 +77,8 @@ export default function ExpensesSetupScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-
       <Text style={styles.title}>Recurring Expenses</Text>
       <Text style={styles.subtitle}>Add expenses that repeat every month</Text>
-
       <FlatList
         data={expenses}
         keyExtractor={(_, index) => index.toString()}
@@ -88,18 +86,14 @@ export default function ExpensesSetupScreen() {
         contentContainerStyle={styles.list}
         style={styles.flatList}
       />
-
-      {/* buttons live outside FlatList so they always stay visible */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.addButton} onPress={addExpense}>
           <Text style={styles.addButtonText}>+ Add Another Expense</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
       </View>
-
     </KeyboardAvoidingView>
   )
 }

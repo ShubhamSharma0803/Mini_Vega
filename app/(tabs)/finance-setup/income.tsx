@@ -10,25 +10,25 @@ import {
   Platform,
 } from 'react-native'
 import { router } from 'expo-router'
-
-type IncomeSource = {
-  name: string
-  amount: string
-  date: string
-}
+import { useFinanceStore } from '../../../store/finance-store'
+import type { IncomeSource } from '../../../store/finance-store'
+// importing type and store from single source of truth
 
 export default function IncomeSetupScreen() {
 
-  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([
+  const { setIncomeSources } = useFinanceStore()
+  // access the action from the global store
+
+  const [incomeSources, setIncomeSourcesLocal] = useState<IncomeSource[]>([
     { name: '', amount: '', date: '' }
   ])
 
   const addSource = () => {
-    setIncomeSources([...incomeSources, { name: '', amount: '', date: '' }])
+    setIncomeSourcesLocal([...incomeSources, { name: '', amount: '', date: '' }])
   }
 
   const updateSource = (index: number, field: keyof IncomeSource, value: string) => {
-    setIncomeSources(
+    setIncomeSourcesLocal(
       incomeSources.map((source, i) =>
         i === index ? { ...source, [field]: value } : source
       )
@@ -36,6 +36,8 @@ export default function IncomeSetupScreen() {
   }
 
   const handleNext = () => {
+    setIncomeSources(incomeSources)
+    // save to Zustand store before leaving this screen
     router.push('/(tabs)/finance-setup/expenses')
   }
 
@@ -70,10 +72,8 @@ export default function IncomeSetupScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-
       <Text style={styles.title}>Income Sources</Text>
       <Text style={styles.subtitle}>Add all your monthly income sources</Text>
-
       <FlatList
         data={incomeSources}
         keyExtractor={(_, index) => index.toString()}
@@ -81,18 +81,14 @@ export default function IncomeSetupScreen() {
         contentContainerStyle={styles.list}
         style={styles.flatList}
       />
-
-      {/* buttons live outside FlatList so they always stay visible */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.addButton} onPress={addSource}>
           <Text style={styles.addButtonText}>+ Add Another Source</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
       </View>
-
     </KeyboardAvoidingView>
   )
 }
@@ -115,7 +111,6 @@ const styles = StyleSheet.create({
   },
   flatList: {
     flex: 1,
-    // flex:1 → FlatList takes all available space between header and buttons
   },
   list: {
     gap: 16,
@@ -142,7 +137,6 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     paddingBottom: 100,
-    // 100 → clears the tab bar height completely
     gap: 12,
     paddingTop: 8,
   },

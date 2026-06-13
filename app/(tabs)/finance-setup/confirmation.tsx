@@ -2,8 +2,13 @@ import React, { useEffect } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFinanceStore } from '../../../store/finance-store'
+// import the store to read the saved data
 
 export default function ConfirmationScreen() {
+
+  const { incomeSources, recurringExpenses } = useFinanceStore()
+  // read both arrays from the global store
 
   const completeSetup = async () => {
     await AsyncStorage.setItem('finance_setup_completed', 'true')
@@ -15,6 +20,11 @@ export default function ConfirmationScreen() {
     completeSetup()
     // runs once when confirmation screen loads
     // saves the flag before user even taps the button
+
+    console.log('Income Sources:', incomeSources)
+    console.log('Recurring Expenses:', recurringExpenses)
+    // DEV ONLY — prints store data to terminal to verify Zustand is working
+    // remove before shipping to users
   }, [])
 
   const handleGoToDashboard = () => {
